@@ -381,17 +381,16 @@ module enclosure(
                     );
                 }
 
-                //enclosure_engraving(
-                  //  string = "VOL",
-                    //size = label_text_size,
-                    //position = [
-                      //  0,
-                        //-knob_radius - label_length / 2 - label_distance
-                    //],
-                   // placard = [knob_radius * 2, label_length],
-                   // quick_preview = quick_preview,
-                   // enclosure_height = dimensions.z
-                //);
+                enclosure_engraving(
+                    string = "VOL",
+                    size = 5,
+                    position = [
+                        0,
+                        -knob_radius - label_length / 2 - label_distance - 1.75
+                    ],
+                    quick_preview = quick_preview,
+                    enclosure_height = dimensions.z
+                );
             }
         }
     }
@@ -617,7 +616,7 @@ module enclosure(
         height = SWITCH_CLUTCH_GRIP_HEIGHT + tolerance * 4;
 
         y = get_switch_peripheral_y(length);
-        z = (dimensions.z - height) / 2;
+        z = (dimensions.z - height) / 2 + 2;
 
         if (just_assembly_valley) {
             _assembly_valley_cavity(
@@ -635,12 +634,12 @@ module enclosure(
             //    y = y + length / 2
             //);
 
-            _side_engraving(
-                string = "1            0",
-                y = y + length / 2,
-                placard = false,
-                z = dimensions.z / 2
-            );
+            // _side_engraving(
+            //     string = "1            0",
+            //     y = y + length / 2,
+            //     placard = false,
+            //     z = dimensions.z / 2
+            // );
         }
     }
 
@@ -797,11 +796,25 @@ module enclosure(
                     h = cavity_depth - shade_depth + e
                 );
             }
+            
+            // --- MINI LED GRILL ---
+            // Uncomment this block (remove /* and */) if you want 
+            // the light to pass through small slits instead of 
+            // shining through the thin plastic shade.
+            /*
+            translate([x, y, dimensions.z - shade_depth]) {
+                for (offset_y = [-1.5, 0, 1.5]) {
+                    translate([0, offset_y, 0])
+                        cube([cavity_diameter * 0.8, 0.8, shade_depth * 4], center=true);
+                }
+            }
+            */
+            // -------------------------------
         } else {
-            translate([x, y, z]) {
+            translate([x, y, z + 3]) {
                 cylinder(
                     d = wall_diameter,
-                    h = wall_height
+                    h = wall_height - 3
                 );
             }
 
@@ -933,14 +946,16 @@ module enclosure(
             - ENCLOSURE_WALL - switch_clutch_length_with_travel - clearance;
 
         y = dimensions.y - ENCLOSURE_WALL - length;
-        z = bottom_height - lip_height;
-
-        height = dimensions.z - z - ENCLOSURE_FLOOR_CEILING;
 
         for (x = [
             ENCLOSURE_WALL - e,
             dimensions.x - ENCLOSURE_WALL - width
         ]) {
+            is_left = x < dimensions.x / 2;
+            z_clearance = is_left ? 8 : 5;
+            z = bottom_height - lip_height + z_clearance;
+            height = dimensions.z - z - ENCLOSURE_FLOOR_CEILING;
+
             translate([x, y, z]) {
                 cube([width + e, length + e, height + e]);
             }
@@ -991,8 +1006,8 @@ module enclosure(
                         }
                         _keys_mount_alignment_fixture(top = false);
                         _speaker_fixture();
-                        _pencil_stand(false);
-                        _battery_holder_fixtures(top = false);
+                        // _pencil_stand(false);
+                        // _battery_holder_fixtures(top = false);
                         _switch_clutch_aligners(bottom = true);
                         _pow_engraving_lip_reinforcement(cavity = false);
                     }
@@ -1025,10 +1040,10 @@ module enclosure(
                             key_gutter = key_gutter
                         );
                         _led_exposure(cavity = false);
-                        pcb_enclosure_top_fixtures(
-                            pcb_position = pcb_position,
-                            enclosure_dimensions = dimensions
-                        );
+                        // pcb_enclosure_top_fixtures(
+                        //     pcb_position = pcb_position,
+                        //     enclosure_dimensions = dimensions
+                        // );
                         _battery_holder_fixtures(top = true);
                         _switch_clutch_aligners(bottom = false);
                         _back_corner_reinforcements();
@@ -1042,11 +1057,49 @@ module enclosure(
                 _keys_exposure();
                 // _branding();
                 _knob_exposure(true);
+
+                // First custom button (Octave)
+                translate([
+                    knob_position.x - (24.5 * 2.54), 
+                    knob_position.y + (2 * 2.54), 
+                    dimensions.z - 20
+                ]) {
+                    cylinder(d=8, h=40, $fn=32);
+                }
+                enclosure_engraving(
+                    string = "O",
+                    size = label_text_size,
+                    position = [
+                        knob_position.x - (24.5 * 2.54), 
+                        knob_position.y + (2 * 2.54) - 8
+                    ],
+                    quick_preview = quick_preview,
+                    enclosure_height = dimensions.z
+                );
+
+                // Second custom button (Mode)
+                translate([
+                    knob_position.x - (29.5 * 2.54), 
+                    knob_position.y + (2 * 2.54), 
+                    dimensions.z - 20
+                ]) {
+                    cylinder(d=8, h=40, $fn=32);
+                }
+                enclosure_engraving(
+                    string = "M",
+                    size = label_text_size,
+                    position = [
+                        knob_position.x - (29.5 * 2.54), 
+                        knob_position.y + (2 * 2.54) - 8
+                    ],
+                    quick_preview = quick_preview,
+                    enclosure_height = dimensions.z
+                );
                 // _bottom_engraving();
                 
                 // _uart_header_exposure();
                 _headphone_jack_cavity();
-                _pencil_stand(true);
+                // _pencil_stand(true);
                 _led_exposure(cavity = true);
                 _switch_exposure();
 

@@ -2,8 +2,10 @@
 #include "KeyBuffer.h"
 
 #define CIRCULAR_BUFFER_DEBUG
-#include <CircularBuffer.h>
+#include <CircularBuffer.hpp>
 #include <Keypad.h>
+
+#include "HardwarePins.h"
 
 const byte ROWS = 4;
 const byte COLS = 5;
@@ -13,15 +15,13 @@ byte key_indexes[ROWS][COLS] = {
   {3, 7, 11, 14, 17},
   {4, 8}
 };
-byte rowPins[ROWS] = {7, 8, 9, 10};
-byte colPins[COLS] = {2, 3, 4, 5, 6};
+byte rowPins[ROWS] = {PIN_MATRIX_ROW_1, PIN_MATRIX_ROW_2, PIN_MATRIX_ROW_3, PIN_MATRIX_ROW_4};
+byte colPins[COLS] = {PIN_MATRIX_COL_1, PIN_MATRIX_COL_2, PIN_MATRIX_COL_3, PIN_MATRIX_COL_4, PIN_MATRIX_COL_5};
 
 Keypad _buttons = Keypad(makeKeymap(key_indexes), rowPins, colPins, ROWS, COLS);
 
 KeyBuffer::KeyBuffer() {
-  CircularBuffer<int, BUFFER_MAX> _buffer;
-
-  const int KEYPAD_LIBRARY_MINIMUM_DEBOUNCE = 1;
+  const int KEYPAD_LIBRARY_MINIMUM_DEBOUNCE = 10;
   _buttons.setDebounceTime(KEYPAD_LIBRARY_MINIMUM_DEBOUNCE);
 }
 
@@ -65,6 +65,8 @@ bool KeyBuffer::removeFromBuffer(int c) {
       _buffer.push(newStack[i]);
     }
   }
+
+  return hasRemoval;
 }
 
 void KeyBuffer::populate() {
@@ -113,4 +115,15 @@ void KeyBuffer::print() {
 
 char KeyBuffer::getFirst() {
   return _buffer.first();
+}
+
+int KeyBuffer::getSize() {
+  return _buffer.size();
+}
+
+char KeyBuffer::getAt(int index) {
+  if (index >= 0 && index < _buffer.size()) {
+    return _buffer[index];
+  }
+  return -1;
 }

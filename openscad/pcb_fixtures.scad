@@ -3,7 +3,7 @@ include <pcb_stool.scad>;
 
 PCB_FIXTURE_CLEARANCE = .3;
 
-PCB_FIXTURE_BUTTON_RAIL_LENGTH = 3;
+PCB_FIXTURE_BUTTON_RAIL_LENGTH = 5;
 
 module _fixture_pcb_difference(
     pcb_position = [0, 0, 0],
@@ -77,10 +77,11 @@ module pcb_bottom_fixtures(
     z = ENCLOSURE_FLOOR_CEILING - e;
 
     module _back_stools(size = PCB_STOOL_DIAMETER) {
-        corner_inset = size / 2 + PCB_STOOL_CHAMFER;
-        y = PCB_LENGTH - corner_inset;
+        right_x = PCB_POT_POSITION.x;
+        left_x = PCB_WIDTH - PCB_POT_POSITION.x;
+        y = PCB_POT_POSITION.y;
 
-        for (position = [[corner_inset, y], [PCB_WIDTH - corner_inset, y]]) {
+        for (position = [[left_x, y], [right_x, y]]) {
             translate([
                 pcb_position.x + position.x,
                 pcb_position.y + position.y,
@@ -94,7 +95,9 @@ module pcb_bottom_fixtures(
     module _button_rail(length = PCB_FIXTURE_BUTTON_RAIL_LENGTH) {
         translate([
             pcb_position.x,
-            pcb_position.y + PCB_BUTTON_POSITIONS[0].y - length / 2,
+            // The old length was 3 (hence the +1.5 for the back edge).
+            // We expand forward (- length) to keep the back edge in its original position.
+            pcb_position.y + PCB_BUTTON_POSITIONS[0].y + 2.54 * 1.5 + 1.5 - length,
             z
         ]) {
             cube([PCB_WIDTH, length, pcb_position.z - z]);
@@ -108,8 +111,8 @@ module pcb_bottom_fixtures(
         offset = wall + tolerance;
 
         corner_size = offset + corner_coverage;
-        corner_xs = [-offset, PCB_WIDTH + offset - corner_size];
-        corner_ys = [-offset];
+        corner_xs = [PCB_WIDTH + offset - corner_size];
+        corner_ys = [-offset - 11];
 
         z = ENCLOSURE_FLOOR_CEILING - e;
 

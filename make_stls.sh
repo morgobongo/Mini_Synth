@@ -8,14 +8,13 @@ set -o errtrace
 
 # Constants
 openscad="/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD"
-timestamp=$(git log -n1 --date=unix --format="%ad" openscad)
-commit_hash=$(git log -n1 --format="%h" openscad)
+timestamp=$(date +"%Y-%m-%d_%Hh%Mm%Ss")
 
 # Flags
 bonk=
 # prefix="oskitone-apc"
 prefix="scout"
-dir="local/3d-models/$prefix-$timestamp-$commit_hash"
+dir="local/3d-models/$prefix-$timestamp"
 query=
 
 # Internal variables
@@ -57,8 +56,8 @@ function export_stl() {
     flip_vertically="$4"
 
     function _run() {
-        ascii_filename="$dir/$prefix-$timestamp-$commit_hash-$stub-ascii.stl"
-        filename="$dir/$prefix-$timestamp-$commit_hash-$stub.stl"
+        ascii_filename="$dir/$prefix-$timestamp-$stub-ascii.stl"
+        filename="$dir/$prefix-$timestamp-$stub.stl"
 
         echo "Exporting $filename..."
 
@@ -106,7 +105,7 @@ function create_zip() {
         echo
         echo "Creating zip"
         pushd $dir
-        zip "$prefix-$timestamp-$commit_hash-ALL.zip" *.stl
+        zip "$prefix-$timestamp-ALL.zip" *.stl
         popd > /dev/null
     fi
 }

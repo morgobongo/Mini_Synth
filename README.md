@@ -12,12 +12,13 @@ The Scout is:
 
 - **Beginner-friendly:** All components are through-hole (instead of surface mount) for easier soldering, and full assembly takes about 45min. Standalone, battery-powered, doesn't need a computer or external speakers to work. Fun!
 - **3D-Printable:** Besides the electronics and nuts and bolts, all parts are 3D-printed. And with a total width of ~160mm (about 6.3"), the Scout can fit on smaller, "Mini" (18x18x18cm) size print beds.
-- **Hackable:** Arduino-compatible and fully open source! Hook up an [FTDI Serial TTL-232 cable](https://www.adafruit.com/product/70) (sold separately) to update its code using the Arduino IDE.
-- **Minimally featured:** 1.5 octaves of keys, a volume knob, on/off switch, speaker, headphone jack. Monophonic square wave with fixed glide and octave.
+- **Hackable:** ESP32-compatible and fully open source! Originally based on Arduino ATmega, it has been ported to the powerful ESP32.
+- **Synth Engine:** Powered by the Mozzi library, the Scout now features a robust audio engine utilizing the ESP32's internal DAC.
+- **Features:** 1.5 octaves of keys, a volume knob, on/off switch, speaker, headphone jack. Now supports **Polyphony (up to 4 voices)**, multiple waveforms (Square, Sawtooth, Sine), ADSR envelopes, LFO modulations (Vibrato/Tremolo), and a built-in Preset system!
 
 In addition to it being the first microcontroller-controlled instrument from Oskitone, the Scout would also make a fine introductory DIY instrument for the budding electronics hobbyist. (Some experience soldering and a general familiarity with how electricity works are recommended though!)
 
-As such, it is intentionally minimal, with the goal of the shortest possible time from starting the kit to making music with it. No MIDI/CV or other IO, as is. If you're looking for a full-featured studio instrument, this ain't it, bub! :)
+As such, it is intentionally minimal, with the goal of the shortest possible time from starting the kit to making music with it. Although recently upgraded with a polyphonic synth engine (Mozzi), it remains easy to tweak and modify. If you want to customize your sounds, simply edit the `ESP32/src/Presets.cpp` file!
 
 **Demo:** [https://vimeo.com/587660426](https://vimeo.com/587660426)<br />
 **Purchase a kit:** [https://www.oskitone.com/product/scout-synth-diy-electronics-kit](https://www.oskitone.com/product/scout-synth-diy-electronics-kit)<br />

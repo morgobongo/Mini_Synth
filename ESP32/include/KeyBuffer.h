@@ -1,5 +1,5 @@
 #define CIRCULAR_BUFFER_DEBUG
-#include <CircularBuffer.h>
+#include <CircularBuffer.hpp>
 #include <Keypad.h>
 
 #ifndef KeyBuffer_h
@@ -14,6 +14,8 @@ class KeyBuffer {
     KeyBuffer();
     bool isEmpty();
     char getFirst();
+    int getSize();
+    char getAt(int index);
     void print();
     void printBuffer();
     void populate();

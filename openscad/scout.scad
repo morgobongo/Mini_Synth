@@ -17,14 +17,14 @@ DEFAULT_TOLERANCE = .1;
 
 module scout(
     show_enclosure_bottom = true,
-    show_battery_holder = true,
-    show_pcb = true,
+    show_battery_holder = false,
+    show_pcb = false,
     show_keys_mount_rail = true,
-    show_keys = true,
-    show_switch_clutch = true,
-    show_enclosure_top = true,
+    show_keys = false,
+    show_switch_clutch = false,
+    show_enclosure_top = false,
     show_accoutrements = true,
-    show_knob = true,
+    show_knob = false,
 
     show_dfm = false,
     show_clearances = true,
@@ -316,7 +316,7 @@ module scout(
                     show_buttons = show_accoutrements,
                     show_led = show_accoutrements,
                     show_pot = show_accoutrements,
-                    show_switch = show_accoutrements,
+                    show_switch = false, // Hiding switch so hole is visible
                     show_pcb_uart_header = show_accoutrements,
                     show_headphone_jack = show_accoutrements,
                     show_circuitry_clearance = show_clearances,
@@ -442,11 +442,11 @@ module scout(
 }
 
 SHOW_ENCLOSURE_BOTTOM = true;
-SHOW_BATTERY_HOLDER = true;
+SHOW_BATTERY_HOLDER = false;
 SHOW_PCB = true;
 SHOW_KEYS_MOUNT_RAIL = true;
 SHOW_KEYS = true;
-SHOW_SWITCH_CLUTCH = true;
+SHOW_SWITCH_CLUTCH = false;
 SHOW_ENCLOSURE_TOP = true;
 SHOW_ACCOUTREMENTS = true;
 SHOW_KNOB = true;

@@ -55,8 +55,8 @@ module enclosure_engraving(
         bottom ? depth : enclosure_height - depth
     ]) {
         rotate([0, bottom ? 180 : 0, 0]) {
-            difference() {
-                if (placard) {
+            if (placard) {
+                difference() {
                     translate([
                         placard.x / (center ? -2 : 1),
                         placard.y / (center ? -2 : 1)
@@ -74,9 +74,25 @@ module enclosure_engraving(
                             top_weight_y = 0
                         );
                     }
-                }
 
-                translate(placard ? [0, 0, -e] : [0, 0, 0]) {
+                    translate([0, 0, -e]) {
+                        engraving(
+                            string = string ? string : undef,
+                            svg = string ? undef : "../../branding.svg",
+                            font = font,
+                            size = string ? size : undef,
+                            resize = string
+                                ? undef
+                                : [size / OSKITONE_LENGTH_WIDTH_RATIO, size],
+                            bleed = quick_preview ? 0 : bleed,
+                            height = depth + e * 2,
+                            center = center,
+                            chamfer = 0
+                        );
+                    }
+                }
+            } else {
+                translate([0, 0, 0]) {
                     engraving(
                         string = string ? string : undef,
                         svg = string ? undef : "../../branding.svg",
@@ -86,9 +102,9 @@ module enclosure_engraving(
                             ? undef
                             : [size / OSKITONE_LENGTH_WIDTH_RATIO, size],
                         bleed = quick_preview ? 0 : bleed,
-                        height = placard ? depth + e * 2 : depth + e,
+                        height = depth + e,
                         center = center,
-                        chamfer =  quick_preview ? 0 : (placard ? 0 : chamfer)
+                        chamfer = quick_preview ? 0 : chamfer
                     );
                 }
             }
