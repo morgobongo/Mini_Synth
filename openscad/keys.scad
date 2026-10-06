@@ -2,8 +2,8 @@
 use <../../poly555/openscad/lib/keys.scad>;
 use <../../poly555/openscad/lib/utils.scad>;
 
-include <nuts_and_bolts.scad>;
-include <utils.scad>;
+include <lib/nuts_and_bolts.scad>;
+include <lib/utils.scad>;
 
 KEYS_COUNT = 17;
 KEYS_MOUNT_LENGTH = NUT_DIAMETER;

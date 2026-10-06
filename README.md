@@ -86,7 +86,8 @@ Because the project relies on a completely different PCB, significant modificati
 - **USB-C Port Hole**: The former power switch hole was repurposed and repositioned for the ESP32 USB-C programming port (Z position moved up by 2mm, Y position shifted by 2.54mm).
 - **Potentiometer Position**: Shifted away from the keys (towards the back) by one standard perfboard hole grid unit (2.54mm).
 - **LED Adjustments**: The LED barrel inside the enclosure was shortened by 3mm. An optional 3-slit mini grill was modeled above the LED.
-- **Support Clearances**: The Z position of the back corner reinforcements was raised asymmetrically (by 8mm on the left side and 5mm on the right side) to provide additional vertical clearance over the ESP32 and components on the PCB.
+- **Support Clearances**: The Z position of the back corner reinforcements was raised asymmetrically (by 8mm on the left side and 5mm on the right side) to provide additional vertical clearance over the ESP32 and components on the PCB. Their shape was also updated to form uniform square prisms (matching the width) to prevent them from protruding too far towards the keyboard.
+- **Floating Geometry Fix**: Removed a legacy battery holder attachment (`_nub`) from the top enclosure union. In the original code, this was improperly anchored, resulting in a disconnected floating block appearing above the top enclosure during STL generation.
 
 ### PCB Fixtures Modifications
 - **Back Support Pillars**: Repositioned to fall exactly below the new potentiometer position and symmetrically on the other side.
@@ -102,6 +103,7 @@ Because the project relies on a completely different PCB, significant modificati
 ### OpenSCAD Code Refactoring & Cleanup
 - **Grid Pitch Abstraction**: The hardcoded `2.54` (perfboard hole spacing in mm) was abstracted into a global `GRID_PITCH` variable. All positions for buttons, LEDs, and USB ports in the enclosure and PCB files were refactored to use this semantic variable.
 - **Removal of Unused Legacy Code**: Features from the original Scout that were deactivated or commented out for STL generation were entirely removed to keep the codebase clean. This includes the UART header footprint, the Pencil Stand module, the physical Switch Clutch mechanism, and legacy side/bottom engravings.
+- **Library Include Fixes**: Corrected broken include paths in `keys.scad` that were preventing variable propagation and causing cascading `undef` geometry errors during STL generation.
 
 ---
 

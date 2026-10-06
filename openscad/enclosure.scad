@@ -121,9 +121,7 @@ module enclosure(
         - default_gutter;
     branding_gutter = label_distance;
 
-    switch_clutch_length_with_travel = get_switch_clutch_length_with_travel(
-        switch_clutch_web_length_extension
-    );
+    switch_clutch_length_with_travel = 11;
 
     module _half(
         _height,
@@ -456,8 +454,7 @@ module enclosure(
 
     function get_usb_port_y(length = 0) = (
         pcb_position.y + PCB_USB_PORT_POSITION.y
-            - SWITCH_ORIGIN.y
-            + SWITCH_BASE_LENGTH / 2
+            + 0.56 // Offset from original switch dimensions
             - length / 2
     );
 
@@ -465,9 +462,8 @@ module enclosure(
         just_assembly_valley = false,
         length_clearance = .2 // intentionally loose
     ) {
-        length = SWITCH_CLUTCH_GRIP_LENGTH + SWITCH_ACTUATOR_TRAVEL
-            + tolerance * 4 + length_clearance * 2;
-        height = SWITCH_CLUTCH_GRIP_HEIGHT + tolerance * 4;
+        length = 11 + tolerance * 4 + length_clearance * 2; // Original switch clutch length was ~11
+        height = 6.4 + tolerance * 4; // Original clutch height was ~6.4
 
         y = get_usb_port_y(length);
         z = (dimensions.z - height) / 2 + 2;
@@ -741,10 +737,14 @@ module enclosure(
     }
 
     module _back_corner_reinforcements(clearance = 1) {
-        width = pcb_position.x - ENCLOSURE_WALL - clearance;
-        length = dimensions.y
+        _calculated_width = pcb_position.x - ENCLOSURE_WALL - clearance;
+        _calculated_length = dimensions.y
             - get_usb_port_y(switch_clutch_length_with_travel)
-            - ENCLOSURE_WALL - switch_clutch_length_with_travel - clearance;
+            - ENCLOSURE_WALL - switch_clutch_length_with_travel - clearance
+            - 5; // Offset to match the original depth before switch was replaced
+
+        width = min(_calculated_width, _calculated_length);
+        length = width;
 
         y = dimensions.y - ENCLOSURE_WALL - length;
 
@@ -839,7 +839,7 @@ module enclosure(
                             key_gutter = key_gutter
                         );
                         _led_exposure(cavity = false);
-                        _battery_holder_fixtures(top = true);
+                        // _battery_holder_fixtures(top = true);
 
                         _back_corner_reinforcements();
                     }
