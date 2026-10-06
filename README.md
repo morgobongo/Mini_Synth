@@ -56,8 +56,12 @@ The synthesizer can act as a Bluetooth MIDI controller for your Mac, PC, or iOS 
 1. **Activate MIDI Mode:** Hold down both the **Mode (M)** and **Octave (O)** buttons simultaneously for 2 seconds.
 2. **Visual Feedback:** The blue LED on the ESP32 will turn ON and stay solid, confirming you are in MIDI Mode. *(Note: The standard ESP32 flashing during normal synth play has been disabled for a cleaner look).* The internal Mozzi synthesizer is automatically muted.
 3. **Connection:** 
-   - On your device, open your Bluetooth settings or your DAW's MIDI settings (e.g., *Audio MIDI Setup* on Mac).
-   - Search for a Bluetooth MIDI device named **"Mini Synth"** and connect to it. No additional drivers are required.
+   - **On macOS / Logic Pro:**
+     1. Open the **Audio MIDI Setup** application (found in `Applications/Utilities`).
+     2. In the menu bar, go to **Window > Show MIDI Studio** (or press `⌘ + 2`).
+     3. Click the **Bluetooth icon** in the top toolbar of the MIDI Studio window.
+     4. A list of Bluetooth devices will appear. Look for **"Mini Synth"** and click **Connect**.
+     5. Open **Logic Pro**. Logic automatically listens to all connected system MIDI devices; no further configuration is needed!
 4. **Usage:** Play the keys! The physical `Octave` button remains functional and will dynamically shift the MIDI notes being sent (`NoteOn` / `NoteOff`).
 5. **Deactivate:** Hold the **Mode** and **Octave** buttons again for 2 seconds. The LED will turn off, the MIDI mode will exit, and the internal synthesizer will be reactivated.
 
