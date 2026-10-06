@@ -81,7 +81,7 @@ Because the project relies on a completely different PCB, significant modificati
 
 ### Hardware & Enclosure Modifications
 - **Overall Case Size**: The PCB length (`PCB_LENGTH`) was increased by `7.62` mm (3 perfboard holes), lengthening the entire device towards the back to accommodate the ESP32 footprint.
-- **Activation of Hidden Elements**: The original speaker and LED components were uncommented and integrated into the enclosure.
+- **Activation of Hidden Elements**: The original pencil stand and battery holder were removed from the new model.
 - **Addition of New Buttons**: Two new cylinders were modeled on top of the enclosure for the **Octave** and **Mode** features, offset from the volume knob.
 - **USB-C Port Hole**: The former power switch hole was repurposed and repositioned for the ESP32 USB-C programming port (Z position moved up by 2mm, Y position shifted by 2.54mm).
 - **Potentiometer Position**: Shifted away from the keys (towards the back) by one standard perfboard hole grid unit (2.54mm).
@@ -107,9 +107,16 @@ Because the project relies on a completely different PCB, significant modificati
 
 ---
 
-## 6. Other Info & Build Scripts
+## 6. Custom Accessories
 
-- **Custom 3D Printed Buttons**: A custom "top hat" button (`openscad/custom_button.scad`) was designed for the Mode and Octave switches (7.6mm top diameter, 12mm base). The hole underneath is 4mm wide to tightly fit a standard `6x6x7 mm` tactile switch.
-- **Button Adapters**: A utility (`openscad/button_adapter.scad`) is included to print an array of `4x4x1 mm` square spacers, used to adapt standard `6x6x5 mm` switches to the required height if you don't have 7mm switches on hand.
-- **Preview Configuration**: Adjusted global visibility parameters in `scout.scad` for cleaner visual debugging.
-- **STL Generation Script**: The `make_stls.sh` script was updated to name output directories using the current date and time (`YYYY-MM-DD_HHhMMmSSs`) rather than Git commit hashes, making iteration tracking easier during development.
+- **Tactile Button (`custom_button.scad`)**: A custom "top hat" button was designed for the Mode and Octave switches.
+  - Top diameter: `7.6mm` (for clearance in the `8mm` enclosure hole).
+  - Top height: `5mm`, featuring a rounded edge.
+  - Base diameter: `12mm` to retain the button inside the enclosure.
+  - Base thickness: `6mm`.
+  - Switch hole: A `4mm` diameter, `2mm` deep hole is subtracted from the bottom to tightly fit a standard `6x6x7 mm` tactile switch.
+- **Button Adapters (`button_adapter.scad`)**: A utility file to print an array of small `4x4x1 mm` square spacers. This is used because the required tactile switch for the main keys is `6x6x6 mm`, but adding this `1mm` adapter under the key cap allows you to use a more common `6x6x5 mm` switch instead.
+
+## 7. Script Modifications
+
+- **STL Generation Script (`make_stls.sh`)**: The script was modified to name output directories and files using the current date and time (`YYYY-MM-DD_HHhMMmSSs`) instead of the latest git commit hash. This makes it easier to track different versions exported during development.
