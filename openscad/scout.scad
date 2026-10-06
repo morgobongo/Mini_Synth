@@ -1,7 +1,6 @@
 /* TODO: extract into common parts repo */
 use <../../apc/openscad/wheels.scad>;
 use <../../poly555/openscad/lib/basic_shapes.scad>;
-use <../../poly555/openscad/lib/pencil_stand.scad>;
 
 include <lib/batteries.scad>;
 include <lib/battery_holder.scad>;
@@ -21,7 +20,6 @@ module scout(
     show_pcb = false,
     show_keys_mount_rail = true,
     show_keys = false,
-    show_switch_clutch = false,
     show_enclosure_top = false,
     show_accoutrements = true,
     show_knob = false,
@@ -41,9 +39,6 @@ module scout(
     knob_top_exposure = 7,
     knob_radius = 10,
     knob_vertical_clearance = DEFAULT_DFM_LAYER_HEIGHT * 2,
-
-    exposed_switch_clearance = 1,
-    switch_clutch_web_length_extension = 4, // NOTE: eyeballed!
 
     enclosure_outer_color = "#FF69B4",
     enclosure_cavity_color = "#cc5490",
@@ -65,8 +60,6 @@ module scout(
     nut_lock_floor = ENCLOSURE_FLOOR_CEILING,
 
     enclosure_lip_height = 3,
-
-    switch_position = 1,
 
     tolerance = 0,
     quick_preview = true,
@@ -132,13 +125,6 @@ module scout(
 
     branding_x = default_gutter;
     branding_y = keys_y + key_length + default_gutter;
-
-    // NOTE: these are eyeballed instead of derived and that's okay!!
-    pencil_stand_x = 20;
-    pencil_stand_y = ENCLOSURE_WALL + (pcb_y - ENCLOSURE_WALL) / 2;
-    pencil_stand_angle_x = -52;
-    pencil_stand_angle_y = 10;
-    pencil_stand_depth = 17;
 
     batteries_x = (enclosure_width - AAA_BATTERY_LENGTH) / 2
         - KEYSTONE_181_SPRING_COMPRESSED_LENGTH;
@@ -231,15 +217,6 @@ module scout(
             pcb_position = [pcb_x, pcb_y, pcb_z],
             z = screw_head_clearance
         );
-
-        translate([pencil_stand_x, pencil_stand_y, 0]) {
-            * % pencil_stand_pencil(
-                wall = ENCLOSURE_INNER_WALL,
-                depth = pencil_stand_depth,
-                angle_x = pencil_stand_angle_x,
-                angle_y = pencil_stand_angle_y
-            );
-        }
     }
 
 
@@ -365,11 +342,6 @@ module scout(
                 battery_holder_floor = battery_holder_floor,
                 batteries_position = [batteries_x, batteries_y, batteries_z],
 
-                pencil_stand_position = [pencil_stand_x, pencil_stand_y],
-                pencil_stand_angle_x = pencil_stand_angle_x,
-                pencil_stand_angle_y = pencil_stand_angle_y,
-                pencil_stand_depth = pencil_stand_depth,
-
                 lip_height = enclosure_lip_height,
 
                 screw_top_clearance = screw_top_clearance,
@@ -441,7 +413,6 @@ intersection() {
         show_enclosure_top = SHOW_ENCLOSURE_TOP,
         show_accoutrements = SHOW_ACCOUTREMENTS,
         show_knob = SHOW_KNOB,
-        show_switch_clutch = SHOW_SWITCH_CLUTCH,
 
         show_dfm = SHOW_DFM,
         show_clearances = SHOW_CLEARANCES,
@@ -473,15 +444,4 @@ intersection() {
 
     // line out
     /* translate([-10, -10, -10]) { cube([122, 120, 100]); } */
-
-    // uart
-    /* translate([25, -10, -10]) { cube([200, 120, 100]); } */
-
-    // pencil stand
-    /* translate([-10, 25, -10]) { cube([200, 120, 100]); } */
-    /* translate([5, -10, -10]) { cube([200, 120, 100]); } */
-
-    // switch_clutch
-    /* translate([-10, 65, -10]) { cube([200, 120, 100]); } */
-    /* translate([-10, 56, -10]) { cube([14, 24, 100]); } */
 }

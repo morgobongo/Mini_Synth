@@ -97,7 +97,7 @@ module pcb_bottom_fixtures(
             pcb_position.x,
             // The old length was 3 (hence the +1.5 for the back edge).
             // We expand forward (- length) to keep the back edge in its original position.
-            pcb_position.y + PCB_BUTTON_POSITIONS[0].y + 2.54 * 1.5 + 1.5 - length,
+            pcb_position.y + PCB_BUTTON_POSITIONS[0].y + GRID_PITCH * 1.5 + 1.5 - length,
             z
         ]) {
             cube([PCB_WIDTH, length, pcb_position.z - z]);

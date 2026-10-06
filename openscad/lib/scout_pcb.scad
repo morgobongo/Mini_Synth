@@ -8,7 +8,9 @@ PCB_WIDTH = 177.292 - 32.004;
 PCB_LENGTH = 124.968 - 80.518 + 6.35; // + 2.5 perfboard holes
 PCB_HEIGHT = 1.6;
 
-PCB_KEY_PLOT = 2.54 * 3;
+GRID_PITCH = 2.54;
+
+PCB_KEY_PLOT = GRID_PITCH * 3;
 
 function _(xy, nudge = [0, 0]) = (
     [(xy.x + nudge.x - 32.004), -(xy.y - 123.444) + nudge.y]
@@ -19,50 +21,44 @@ function _(xy, nudge = [0, 0]) = (
 MAGIC = .28;
 
 PCB_BUTTON_POSITIONS = [
-    _([170.942 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([163.322 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([155.702 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([148.082 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([140.462 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([125.222 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([117.602 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([109.982 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([102.362 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([94.742 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([87.122 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([79.502 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([64.262 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([56.642 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([49.022 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([41.402 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
-    _([33.782 + 2.54 * .9, 121.92], [0, 2.54 * 1.9]),
+    _([170.942 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([163.322 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([155.702 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([148.082 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([140.462 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([125.222 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([117.602 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([109.982 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([102.362 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([94.742 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([87.122 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([79.502 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([64.262 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([56.642 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([49.022 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([41.402 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
+    _([33.782 + GRID_PITCH * .9, 121.92], [0, GRID_PITCH * 1.9]),
 ];
 
 PCB_HOLE_DIAMETER = 3.2;
 PCB_HOLE_POSITIONS = [
-    _([65.066, 107.696], [0, 2.54 / 2 + MAGIC]),
-    _([78.26, 107.696], [0, 2.54 / 2 + MAGIC]),
-    _([104.648, 107.696], [0, 2.54 / 2 + MAGIC]),
-    _([131.036, 107.696], [0, 2.54 / 2 + MAGIC]),
-    _([144.23, 107.696], [0, 2.54 / 2 + MAGIC]),
+    _([65.066, 107.696], [0, GRID_PITCH / 2 + MAGIC]),
+    _([78.26, 107.696], [0, GRID_PITCH / 2 + MAGIC]),
+    _([104.648, 107.696], [0, GRID_PITCH / 2 + MAGIC]),
+    _([131.036, 107.696], [0, GRID_PITCH / 2 + MAGIC]),
+    _([144.23, 107.696], [0, GRID_PITCH / 2 + MAGIC]),
 ];
 
 PCB_RELIEF_HOLE_DIAMETER = 3.5;
 PCB_RELIEF_HOLE_POSITIONS = [
-    _([74.168, 122.555], [0, 2.54 / 2 + MAGIC]),
-    _([135.128, 122.555], [0, 2.54 / 2 + MAGIC]),
+    _([74.168, 122.555], [0, GRID_PITCH / 2 + MAGIC]),
+    _([135.128, 122.555], [0, GRID_PITCH / 2 + MAGIC]),
 ];
 
 PCB_LED_Z = 3; // RGB LED pin footprint prevents it from resting directly on PCB
-PCB_LED_POSITION = _([156.474, 86.706], [-2.54, 2.54 - MAGIC]);
-PCB_POT_POSITION = _([172.824, 97.796], [-2.54, 7 + 2.54 + 2.54 / 2 + MAGIC]);
-PCB_USB_PORT_POSITION = _([34.544, 91.98], [0, 2.54]);
-
-// https://www.digikey.com/en/products/detail/adam-tech/PH1RB-06-UA/9830592
-PCB_UART_HEADER_POSITION = _([42.926, 88.773], [2.54 / -2, 2.54 / 2]);
-PCB_UART_HEADER_WIDTH = 2.54 * 6;
-PCB_UART_HEADER_HEIGHT = 2.5;
-UART_HEADER_PIN_SIZE = .8;
+PCB_LED_POSITION = _([156.474, 86.706], [-GRID_PITCH, GRID_PITCH - MAGIC]);
+PCB_POT_POSITION = _([172.824, 97.796], [-GRID_PITCH, 7 + GRID_PITCH + GRID_PITCH / 2 + MAGIC]);
+PCB_USB_PORT_POSITION = _([34.544, 91.98], [0, GRID_PITCH]);
 
 PCB_HEADPHONE_JACK_POSITION = _(
     [138.176, 84.11],
@@ -126,7 +122,6 @@ module scout_pcb(
     show_silkscreen = true,
     show_led = true,
     show_pot = true,
-    show_pcb_uart_header = true,
     show_headphone_jack = true,
     show_circuitry_clearance = true
 ) {
@@ -190,27 +185,6 @@ module scout_pcb(
     }
 
 
-
-    if (show_pcb_uart_header) {
-        x = 2.54 / 2 - UART_HEADER_PIN_SIZE / 2;
-        z = PCB_UART_HEADER_HEIGHT / 2 - UART_HEADER_PIN_SIZE / 2;
-
-        _translate(PCB_UART_HEADER_POSITION) {
-            translate([0, 1.8, 0]) {
-                % cube([
-                    PCB_UART_HEADER_WIDTH,
-                    PCB_UART_HEADER_HEIGHT,
-                    PCB_UART_HEADER_HEIGHT
-                ]);
-            }
-
-            for (i = [0 : 5]) {
-                translate([x + i * 2.54, 0, z]) {
-                    % cube([UART_HEADER_PIN_SIZE, 10.25, UART_HEADER_PIN_SIZE]);
-                }
-            }
-        }
-    }
 
     if (show_headphone_jack) {
         _translate(PCB_HEADPHONE_JACK_POSITION) {

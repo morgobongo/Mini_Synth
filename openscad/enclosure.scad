@@ -283,60 +283,7 @@ module enclosure(
         }
     }
 
-    module _branding(debug = false) {
-        model_length = get_branding_model_length(
-            branding_gutter,
-            branding_make_to_model_ratio,
-            branding_available_length
-        );
-        make_length = get_branding_make_length(
-            branding_gutter,
-            branding_make_to_model_ratio,
-            branding_available_length
-        );
-        make_width = get_branding_make_width(
-            branding_gutter,
-            branding_make_to_model_ratio,
-            branding_available_length
-        );
 
-        enclosure_engraving(
-            string = "SCOUT",
-            size = model_length,
-            center = false,
-            position = [
-                branding_position.x - model_length * .075, // HACK: fix alignment
-                branding_position.y
-            ],
-            quick_preview = quick_preview,
-            enclosure_height = dimensions.z
-        );
-
-        enclosure_engraving(
-            size = make_length,
-            center = false,
-            position = [
-                branding_position.x,
-                branding_position.y + model_length + branding_gutter
-            ],
-            quick_preview = quick_preview,
-            enclosure_height = dimensions.z
-        );
-
-        if (debug) {
-            translate([
-                branding_position.x,
-                branding_position.y,
-                dimensions.z - ENCLOSURE_FLOOR_CEILING
-            ]) {
-                # cube([
-                    branding_available_width,
-                    branding_available_length,
-                    ENCLOSURE_FLOOR_CEILING + 1
-                ]);
-            }
-        }
-    }
 
     module _knob_exposure(
         cavity,
@@ -395,22 +342,7 @@ module enclosure(
         }
     }
 
-    module _bottom_engraving(
-        brand_length = 8,
-        brand_corner = 10,
-    ) {
-        enclosure_engraving(
-            size = brand_length,
-            center = false,
-            position = [
-                dimensions.x - brand_corner,
-                brand_corner
-            ],
-            bottom = true,
-            quick_preview = quick_preview,
-            enclosure_height = dimensions.z
-        );
-    }
+
 
     module _speaker_fixture() {
         translate([
@@ -442,36 +374,7 @@ module enclosure(
         }
     }
 
-    module _side_engraving(
-        x = undef,
-        y = undef,
-        string,
-        width = SIDE_ENGRAVING_DEFAULT_WIDTH,
-        z = (dimensions.z - SWITCH_CLUTCH_GRIP_HEIGHT - label_length) / 2
-            - 1,
-        placard = true
-    ) {
-        is_left = y != undef;
 
-        translate([
-            is_left ? -e : x,
-            is_left ? y : dimensions.y + e,
-            z
-        ]) {
-            rotate([90, 0, is_left ? 90 : 0]) {
-                enclosure_engraving(
-                    string = string,
-                    size = label_text_size,
-                    depth = ENCLOSURE_ENGRAVING_DEPTH,
-                    placard = placard ? [width, label_length] : undef,
-                    chamfer_placard_top = true,
-                    bottom = true,
-                    quick_preview = quick_preview,
-                    enclosure_height = dimensions.z
-                );
-            }
-        }
-    }
 
     module _pow_engraving_lip_reinforcement(cavity) {
         width = cavity ? ENCLOSURE_WALL : ENCLOSURE_WALL - e * 2;
@@ -489,49 +392,6 @@ module enclosure(
         }
     }
 
-    module _uart_header_exposure(
-        just_assembly_valley = false,
-        x_bleed = 1,
-        min_height = 4
-    ) {
-        pin_center_z = pcb_position.z + PCB_HEIGHT + PCB_UART_HEADER_HEIGHT / 2;
-        label_top_z = dimensions.z / 2 + label_text_size / 2;
-        height = max(min_height, abs(pin_center_z - label_top_z) * 2);
-
-        x = pcb_position.x + PCB_UART_HEADER_POSITION.x - x_bleed;
-        z = pin_center_z - height / 2;
-
-        width = PCB_UART_HEADER_WIDTH + x_bleed * 2 + tolerance * 2;
-
-        if (just_assembly_valley) {
-            _assembly_valley_cavity(
-                x = x,
-                top_z = z,
-                width = width
-            );
-        } else {
-            translate([x, dimensions.y - ENCLOSURE_WALL - e, z - tolerance]) {
-                cube([
-                    width,
-                    ENCLOSURE_WALL + e * 2,
-                    height + tolerance * 2
-                ]);
-            }
-
-            //_side_engraving(
-              //  x = x + width / 2,
-                //string = "UART",
-                //width = width
-            //);
-
-            //_side_engraving(
-              //  x = x + width / 2,
-              //  string = "G               B",
-              //  placard = false,
-              //  z = dimensions.z / 2
-           // );
-        }
-    }
 
     module _keys_mount_alignment_fixture(top) {
         keys_to_enclosure_distance =
@@ -591,12 +451,6 @@ module enclosure(
         } else {
             _c(cavity_diameter, ENCLOSURE_WALL);
             _c(plug_clearance_diameter, plug_clearance_depth);
-
-            //_side_engraving(
-              //  x = x,
-                //width = engraving_width,
-                //string = "LINE"
-            //);
         }
     }
 
@@ -628,18 +482,6 @@ module enclosure(
             translate([-e, y, z]) {
                 cube([ENCLOSURE_WALL + e * 2, length, height]);
             }
-
-            //_side_engraving(
-            //    string = "POW",
-            //    y = y + length / 2
-            //);
-
-            // _side_engraving(
-            //     string = "1            0",
-            //     y = y + length / 2,
-            //     placard = false,
-            //     z = dimensions.z / 2
-            // );
         }
     }
 
@@ -722,34 +564,7 @@ module enclosure(
         }
     }
 
-    module _pencil_stand(
-        cavity,
 
-        x = pencil_stand_position.x,
-        y = pencil_stand_position.y
-    ) {
-        if (cavity) {
-            translate([x, y, -e]) {
-                pencil_stand_cavity(
-                    wall = ENCLOSURE_INNER_WALL,
-                    depth = pencil_stand_depth + e,
-                    angle_x = pencil_stand_angle_x,
-                    angle_y = pencil_stand_angle_y,
-                    add_tightening_webs = true,
-                    chamfer = .6
-                );
-            }
-        } else {
-            translate([x, y, e]) {
-                pencil_stand(
-                    wall = ENCLOSURE_INNER_WALL,
-                    depth = pencil_stand_depth,
-                    angle_x = pencil_stand_angle_x,
-                    angle_y = pencil_stand_angle_y
-                );
-            }
-        }
-    }
 
     module _led_exposure(
         cavity = true,
@@ -992,7 +807,6 @@ module enclosure(
                         }
                         _keys_mount_alignment_fixture(top = false);
                         _speaker_fixture();
-                        // _pencil_stand(false);
                         // _battery_holder_fixtures(top = false);
 
                         _pow_engraving_lip_reinforcement(cavity = false);
@@ -1008,7 +822,6 @@ module enclosure(
                         }
 
                         color(cavity_color) {
-                           // _uart_header_exposure(just_assembly_valley = true);
                             _headphone_jack_cavity(just_assembly_valley = true);
                             _usb_port_exposure(just_assembly_valley = true);
                             _pow_engraving_lip_reinforcement(cavity = true);
@@ -1026,10 +839,6 @@ module enclosure(
                             key_gutter = key_gutter
                         );
                         _led_exposure(cavity = false);
-                        // pcb_enclosure_top_fixtures(
-                        //     pcb_position = pcb_position,
-                        //     enclosure_dimensions = dimensions
-                        // );
                         _battery_holder_fixtures(top = true);
 
                         _back_corner_reinforcements();
@@ -1041,13 +850,12 @@ module enclosure(
 
             color(cavity_color) {
                 _keys_exposure();
-                // _branding();
                 _knob_exposure(true);
 
                 // First custom button (Octave)
                 translate([
-                    knob_position.x - (24.5 * 2.54), 
-                    knob_position.y + (2 * 2.54), 
+                    knob_position.x - (24.5 * GRID_PITCH), 
+                    knob_position.y + (2 * GRID_PITCH), 
                     dimensions.z - 20
                 ]) {
                     cylinder(d=8, h=40, $fn=32);
@@ -1056,8 +864,8 @@ module enclosure(
                     string = "O",
                     size = label_text_size,
                     position = [
-                        knob_position.x - (24.5 * 2.54), 
-                        knob_position.y + (2 * 2.54) - 8
+                        knob_position.x - (24.5 * GRID_PITCH), 
+                        knob_position.y + (2 * GRID_PITCH) - 8
                     ],
                     quick_preview = quick_preview,
                     enclosure_height = dimensions.z
@@ -1065,8 +873,8 @@ module enclosure(
 
                 // Second custom button (Mode)
                 translate([
-                    knob_position.x - (29.5 * 2.54), 
-                    knob_position.y + (2 * 2.54), 
+                    knob_position.x - (29.5 * GRID_PITCH), 
+                    knob_position.y + (2 * GRID_PITCH), 
                     dimensions.z - 20
                 ]) {
                     cylinder(d=8, h=40, $fn=32);
@@ -1075,17 +883,14 @@ module enclosure(
                     string = "M",
                     size = label_text_size,
                     position = [
-                        knob_position.x - (29.5 * 2.54), 
-                        knob_position.y + (2 * 2.54) - 8
+                        knob_position.x - (29.5 * GRID_PITCH), 
+                        knob_position.y + (2 * GRID_PITCH) - 8
                     ],
                     quick_preview = quick_preview,
                     enclosure_height = dimensions.z
                 );
-                // _bottom_engraving();
                 
-                // _uart_header_exposure();
                 _headphone_jack_cavity();
-                // _pencil_stand(true);
                 _led_exposure(cavity = true);
                 _usb_port_exposure();
 

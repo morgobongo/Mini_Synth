@@ -10,131 +10,17 @@
 #include <tables/sin2048_int8.h>
 #include "KeyBuffer.h"
 #include "Notes.h"
+#include "Presets.h"
+#include "MidiManager.h"
 
 // ---------------------------------------------------------
-// WAVEFORM ALIASES
-// ---------------------------------------------------------
-const int8_t* square = SQUARE_NO_ALIAS_2048_DATA;
-const int8_t* saw = SAW2048_DATA;
-const int8_t* sine = SIN2048_DATA;
 
-// ---------------------------------------------------------
-// PRESET ABSTRACTION
-// ---------------------------------------------------------
-
-enum PolyGlideMode {
-  GLIDE_ALL,
-  GLIDE_LOWEST,
-  GLIDE_HIGHEST
-};
-
-struct Preset {
-  int numVoices;           // 1 for Monophonic, 4 for Polyphonic
-  const int8_t* waveform;
-  int glideTimeMs;
-  int envAttack;
-  int envDecay;
-  int envSustainLevel;
-  int envRelease;
-  int vibratoDepth;
-  float vibratoSpeed;
-  int tremoloDepth;
-  float tremoloSpeed;
-  PolyGlideMode polyGlideMode;
-  int masterVolume;             // Volume scaling (0-255)
-};
-
-// Preset 1: Original Oskitone (Monophonic, Glide, Gate Envelope)
-Preset SOUND_1 = {
-  1,                            // numVoices (Monophonic)
-  square,                       // waveform
-  50,                           // glideTimeMs
-  2,                            // envAttack (fast gate)
-  2,                            // envDecay
-  255,                          // envSustainLevel (full volume)
-  2,                            // envRelease (fast gate cut)
-  0,                            // vibratoDepth
-  6.0f,                         // vibratoSpeed
-  0,                            // tremoloDepth
-  4.0f,                         // tremoloSpeed
-  GLIDE_ALL,                    // polyGlideMode
-  128                           // masterVolume (Square mono est fort, on réduit à ~50%)
-};
-
-// Preset 2: Modular Canvas (Polyphonic, ADSR, LFOs, Sawtooth)
-// -------------------------------------------------------------
-// Guide des paramètres (Parameters Guide) :
-// - numVoices : 1 (Monophonique) ou 4 (Polyphonique)
-// - waveform : square (Carrée), saw (Scie), sine (Sinus)
-// - glideTimeMs : Temps de glissement (portamento) en millisecondes. 0 pour désactiver.
-// - envAttack / envDecay / envRelease : Temps des phases ADSR en ms (ex: 2 pour percussif, 1000 pour lent)
-// - envSustainLevel : Volume de la note tenue, de 0 (silence) à 255 (volume maximum)
-// - vibratoDepth : Profondeur du LFO sur le pitch (0 = désactivé, 5 = léger, 20+ = intense)
-// - vibratoSpeed : Vitesse du vibrato en Hz (ex: 6.0f)
-// - tremoloDepth : Profondeur du LFO sur le volume (0 = désactivé, 100 = moyen, 255 = haché)
-// - tremoloSpeed : Vitesse du tremolo en Hz (ex: 4.0f)
-// - polyGlideMode : (Seulement si numVoices > 1) 
-//                   GLIDE_ALL (glisse tout), GLIDE_LOWEST (note grave), GLIDE_HIGHEST (note aiguë)
-// - masterVolume : Volume de sortie (0-255). Utile pour équilibrer les ondes ou la polyphonie.
-// -------------------------------------------------------------
-Preset SOUND_2 = {
-  4,                            // numVoices (Polyphonic)
-  square,                       // waveform
-  0,                            // glideTimeMs
-  40,                           // envAttack (fast gate)
-  40,                           // envDecay
-  255,                          // envSustainLevel (full volume)
-  30,                           // envRelease (fast gate cut)
-  25,                           // vibratoDepth
-  6.0f,                         // vibratoSpeed
-  0,                            // tremoloDepth
-  4.0f,                         // tremoloSpeed
-  GLIDE_LOWEST,                 // polyGlideMode
-  80                            // masterVolume (Square 4 voix, on réduit beaucoup pour éviter saturation)
-};
-
-// Preset 3: Lead Synth (Mono, Sawtooth, Long Glide)
-Preset SOUND_3 = {
-  1,                            // numVoices (Monophonic)
-  saw,                          // waveform
-  150,                          // glideTimeMs
-  100,                          // envAttack (soft start)
-  50,                           // envDecay
-  200,                          // envSustainLevel
-  500,                          // envRelease (long tail)
-  10,                           // vibratoDepth
-  4.0f,                         // vibratoSpeed
-  0,                            // tremoloDepth
-  0.0f,                         // tremoloSpeed
-  GLIDE_ALL,                    // polyGlideMode
-  160                           // masterVolume (Saw mono est un peu fort, on réduit)
-};
-
-// Preset 4: Oskitone Polyphonique (Square, Polyphonic, Glide)
-Preset SOUND_4 = {
-  4,                            // numVoices (Polyphonic)
-  square,                       // waveform
-  50,                           // glideTimeMs
-  2,                            // envAttack (fast gate)
-  2,                            // envDecay
-  255,                          // envSustainLevel (full volume)
-  2,                            // envRelease (fast gate cut)
-  0,                            // vibratoDepth
-  6.0f,                         // vibratoSpeed
-  0,                            // tremoloDepth
-  4.0f,                         // tremoloSpeed
-  GLIDE_ALL,                    // polyGlideMode
-  80                            // masterVolume (Réduit pour 4 voix)
-};
-
-// ---------------------------------------------------------
 // PUSH BUTTONS & BANK CONFIG
 // ---------------------------------------------------------
 #define BUTTON_PRESET_PIN 15
 #define BUTTON_OCTAVE_PIN 33
 
-Preset* soundBank[] = { &SOUND_1, &SOUND_2, &SOUND_3, &SOUND_4 };
-const int NUM_PRESETS = 4;
+
 int currentPresetIndex = 0;
 Preset* activePreset = soundBank[0];
 
@@ -210,6 +96,10 @@ void setup() {
   loadPreset(activePreset);
 
   startMozzi(64); // Control rate of 64 Hz
+  
+  // Setup BLE MIDI
+  MidiManager::begin();
+
   blink();
 }
 
@@ -219,52 +109,88 @@ void updateControl() {
   // ----------------------------------------------------
   unsigned long now = millis();
   
-  if (digitalRead(BUTTON_PRESET_PIN) == LOW && (now - lastPresetTouch > TOUCH_DEBOUNCE_MS)) {
-    lastPresetTouch = now;
-    
-    currentPresetIndex++;
-    if (currentPresetIndex >= NUM_PRESETS) {
-      currentPresetIndex = 0;
+  bool presetPressed = (digitalRead(BUTTON_PRESET_PIN) == LOW);
+  bool octavePressed = (digitalRead(BUTTON_OCTAVE_PIN) == LOW);
+
+  static unsigned long bothHeldStart = 0;
+  static bool bothWereHeld = false;
+  static bool ignoreNextRelease = false;
+  static int playingMidiNote[16] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+
+  if (presetPressed && octavePressed) {
+    if (!bothWereHeld) {
+      bothWereHeld = true;
+      bothHeldStart = now;
+    } else if (now - bothHeldStart > 2000 && !ignoreNextRelease) {
+      // Toggle MIDI Mode
+      bool newMode = !MidiManager::isModeActive();
+      MidiManager::setMode(newMode);
+      ignoreNextRelease = true;
+      if (printToSerial) {
+        Serial.print("MIDI Mode: ");
+        Serial.println(newMode ? "ON" : "OFF");
+      }
+      digitalWrite(LED_BUILTIN, newMode ? HIGH : LOW);
     }
-    
-    loadPreset(soundBank[currentPresetIndex]);
-    if (printToSerial) {
-      Serial.print("Preset: SOUND_");
-      Serial.println(currentPresetIndex + 1);
+  } else {
+    bothWereHeld = false;
+    if (ignoreNextRelease && !presetPressed && !octavePressed) {
+      ignoreNextRelease = false;
     }
   }
+
+  if (!bothWereHeld && !ignoreNextRelease) {
+    if (presetPressed && (now - lastPresetTouch > TOUCH_DEBOUNCE_MS)) {
+      lastPresetTouch = now;
+      currentPresetIndex++;
+      if (currentPresetIndex >= NUM_PRESETS) currentPresetIndex = 0;
+      loadPreset(soundBank[currentPresetIndex]);
+      if (printToSerial) {
+        Serial.print("Preset: SOUND_");
+        Serial.println(currentPresetIndex + 1);
+      }
+    }
+    
+    if (octavePressed && (now - lastOctaveTouch > TOUCH_DEBOUNCE_MS)) {
+      lastOctaveTouch = now;
+      if (octave == 3) octave = 2;
+      else if (octave == 2) octave = 4;
+      else octave = 3;
+      if (printToSerial) {
+        Serial.print("Octave: ");
+        Serial.println(octave);
+      }
+    }
+  }
+
+  // ----------------------------------------------------
+  // MIDI & BUFFER LOGIC
+  // ----------------------------------------------------
+  bool isKeyActive[16] = {false};
   
-  if (digitalRead(BUTTON_OCTAVE_PIN) == LOW && (now - lastOctaveTouch > TOUCH_DEBOUNCE_MS)) {
-    lastOctaveTouch = now;
-    if (octave == 3) {
-      octave = 2;
-    } else if (octave == 2) {
-      octave = 4;
-    } else {
-      octave = 3;
-    }
-    if (printToSerial) {
-      Serial.print("Octave: ");
-      Serial.println(octave);
-    }
+  for (int i = 0; i < buffer.getSize(); i++) {
+    char k = buffer.getAt(i);
+    if (k >= 0 && k < 16) isKeyActive[k] = true;
   }
 
-  activeVoiceCount = buffer.getSize();
+  MidiManager::processKeys(isKeyActive, octave);
+  
+  if (MidiManager::isModeActive()) {
+    activeVoiceCount = 0; // Silence local synth in MIDI mode
+  } else {
+    activeVoiceCount = buffer.getSize();
+  }
 
-  // Print buffer changes
+  // Print buffer changes (and no LED flashing anymore!)
   static char lastKey = -1;
   if (!buffer.isEmpty()) {
     char currentKey = buffer.getFirst();
     if (currentKey != lastKey) {
-      if (printToSerial) {
-        buffer.print();
-      }
+      if (printToSerial) buffer.print();
       lastKey = currentKey;
     }
-    digitalWrite(LED_BUILTIN, HIGH);
   } else {
     lastKey = -1;
-    digitalWrite(LED_BUILTIN, LOW);
   }
 
   // LFO Modulations
