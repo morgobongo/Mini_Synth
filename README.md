@@ -82,7 +82,7 @@ Because the project relies on a completely different PCB, significant modificati
 - **USB-C Port Hole**: The former power switch hole was repurposed and repositioned for the ESP32 USB-C programming port (Z position moved up by 2mm, Y position shifted by 2.54mm).
 - **Potentiometer Position**: Shifted away from the keys (towards the back) by one standard perfboard hole grid unit (2.54mm).
 - **LED Adjustments**: The LED barrel inside the enclosure was shortened by 3mm. An optional 3-slit mini grill was modeled above the LED.
-- **Support Clearances**: The Z position of the back corner reinforcements was increased by 5-8mm to provide more vertical clearance over the PCB.
+- **Support Clearances**: The Z position of the back corner reinforcements was raised asymmetrically (by 8mm on the left side and 5mm on the right side) to provide additional vertical clearance over the ESP32 and components on the PCB.
 
 ### PCB Fixtures Modifications
 - **Back Support Pillars**: Repositioned to fall exactly below the new potentiometer position and symmetrically on the other side.
