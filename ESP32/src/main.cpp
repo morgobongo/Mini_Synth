@@ -116,6 +116,7 @@ void updateControl() {
   static bool bothWereHeld = false;
   static bool ignoreNextRelease = false;
   static int playingMidiNote[16] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+  static unsigned long previewSampleEndTime = 0;
 
   if (presetPressed && octavePressed) {
     if (!bothWereHeld) {
@@ -145,6 +146,8 @@ void updateControl() {
       currentPresetIndex++;
       if (currentPresetIndex >= NUM_PRESETS) currentPresetIndex = 0;
       loadPreset(soundBank[currentPresetIndex]);
+      octave = 3; // Reset octave to default when mode changes
+      previewSampleEndTime = now + 400; // Preview sample for 400ms
       if (printToSerial) {
         Serial.print("Preset: SOUND_");
         Serial.println(currentPresetIndex + 1);
@@ -175,8 +178,20 @@ void updateControl() {
 
   MidiManager::processKeys(isKeyActive, octave);
   
+  bool isPreviewing = false;
+  if (!MidiManager::isModeActive() && (now < previewSampleEndTime)) {
+    if (buffer.isEmpty()) {
+      isPreviewing = true;
+    } else {
+      // Cancel preview if a real key is pressed
+      previewSampleEndTime = 0; 
+    }
+  }
+
   if (MidiManager::isModeActive()) {
     activeVoiceCount = 0; // Silence local synth in MIDI mode
+  } else if (isPreviewing) {
+    activeVoiceCount = 1; // Force 1 voice for the preview
   } else {
     activeVoiceCount = buffer.getSize();
   }
@@ -204,7 +219,7 @@ void updateControl() {
     // MONOPHONIC MODE (Last-Note Priority & Glide)
     // ----------------------------------------------------
     if (activeVoiceCount > 0) {
-      char key = buffer.getAt(0); // Index 0 is the most recently pressed key
+      char key = isPreviewing ? 0 : buffer.getAt(0); // Index 0 is the most recently pressed key
       float targetFreq = notes.get(key) / 4 * pow(2, octave);
       float steps = (float)(activePreset->glideTimeMs * AUDIO_RATE) / 1000.0f;
       
@@ -249,7 +264,7 @@ void updateControl() {
     
     // First, maintain currently held keys
     for (int i = 0; i < activeVoiceCount; i++) {
-      char key = buffer.getAt(i);
+      char key = isPreviewing ? 0 : buffer.getAt(i);
       
       for (int v = 0; v < NUM_VOICES; v++) {
         if (voices[v].isActive && voices[v].currentKey == key && !matched[v]) {
@@ -275,14 +290,14 @@ void updateControl() {
     char minKey = 127;
     char maxKey = -1;
     for (int i = 0; i < activeVoiceCount; i++) {
-      char k = buffer.getAt(i);
+      char k = isPreviewing ? 0 : buffer.getAt(i);
       if (k < minKey) minKey = k;
       if (k > maxKey) maxKey = k;
     }
     
     // Now allocate new keys
     for (int i = 0; i < activeVoiceCount; i++) {
-      char key = buffer.getAt(i);
+      char key = isPreviewing ? 0 : buffer.getAt(i);
       bool alreadyAssigned = false;
       
       for (int v = 0; v < NUM_VOICES; v++) {
