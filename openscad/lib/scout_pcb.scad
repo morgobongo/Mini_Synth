@@ -56,7 +56,7 @@ PCB_RELIEF_HOLE_POSITIONS = [
 PCB_LED_Z = 3; // RGB LED pin footprint prevents it from resting directly on PCB
 PCB_LED_POSITION = _([156.474, 86.706], [-2.54, 2.54 - MAGIC]);
 PCB_POT_POSITION = _([172.824, 97.796], [-2.54, 7 + 2.54 + 2.54 / 2 + MAGIC]);
-PCB_SWITCH_POSITION = _([34.544, 91.98], [0, 2.54]);
+PCB_USB_PORT_POSITION = _([34.544, 91.98], [0, 2.54]);
 
 // https://www.digikey.com/en/products/detail/adam-tech/PH1RB-06-UA/9830592
 PCB_UART_HEADER_POSITION = _([42.926, 88.773], [2.54 / -2, 2.54 / 2]);
@@ -126,12 +126,9 @@ module scout_pcb(
     show_silkscreen = true,
     show_led = true,
     show_pot = true,
-    show_switch = true,
     show_pcb_uart_header = true,
     show_headphone_jack = true,
-    show_circuitry_clearance = true,
-
-    switch_position = 0
+    show_circuitry_clearance = true
 ) {
     e = .0143;
     silkscreen_height = e;
@@ -145,7 +142,7 @@ module scout_pcb(
                     translate([0, 0, PCB_HEIGHT - e]) {
                         linear_extrude(silkscreen_height + e) {
                             offset(.1) {
-                                import("../kicad/scout/scout-brd.svg");
+                                import("../assets/scout-brd.svg");
                             }
                         }
                     }
@@ -192,11 +189,7 @@ module scout_pcb(
         }
     }
 
-    if (show_switch) {
-        _translate(PCB_SWITCH_POSITION) {
-            % switch(switch_position);
-        }
-    }
+
 
     if (show_pcb_uart_header) {
         x = 2.54 / 2 - UART_HEADER_PIN_SIZE / 2;

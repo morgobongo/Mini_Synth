@@ -1,5 +1,5 @@
-include <pcb_mounting_columns.scad>;
-include <pcb_stool.scad>;
+include <lib/pcb_mounting_columns.scad>;
+include <lib/pcb_stool.scad>;
 
 PCB_FIXTURE_CLEARANCE = .3;
 

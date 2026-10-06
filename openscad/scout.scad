@@ -3,15 +3,15 @@ use <../../apc/openscad/wheels.scad>;
 use <../../poly555/openscad/lib/basic_shapes.scad>;
 use <../../poly555/openscad/lib/pencil_stand.scad>;
 
-include <batteries.scad>;
-include <battery_holder.scad>;
-include <scout_pcb.scad>;
+include <lib/batteries.scad>;
+include <lib/battery_holder.scad>;
+include <lib/scout_pcb.scad>;
 include <enclosure.scad>;
 include <keys.scad>;
-include <nuts_and_bolts.scad>;
-include <speaker.scad>;
-include <switch_clutch.scad>;
-use <utils.scad>;
+include <lib/nuts_and_bolts.scad>;
+include <lib/speaker.scad>;
+
+use <lib/utils.scad>;
 
 DEFAULT_TOLERANCE = .1;
 
@@ -242,28 +242,7 @@ module scout(
         }
     }
 
-    module _switch_clutch() {
-        x = pcb_x + PCB_SWITCH_POSITION.x;
-        y = pcb_y + PCB_SWITCH_POSITION.y;
 
-        translate([x, y]) {
-            switch_clutch(
-                position = switch_position,
-
-                web_available_width = pcb_x - ENCLOSURE_WALL,
-                web_length_extension = switch_clutch_web_length_extension,
-                enclosure_height = enclosure_height,
-
-                tolerance = tolerance,
-
-                outer_color = "#fff",
-                cavity_color = "#eee",
-
-                show_dfm = show_dfm,
-                quick_preview = quick_preview
-            );
-        }
-    }
 
     module _battery_holder(
         outer_color = enclosure_outer_color,
@@ -316,12 +295,9 @@ module scout(
                     show_buttons = show_accoutrements,
                     show_led = show_accoutrements,
                     show_pot = show_accoutrements,
-                    show_switch = false, // Hiding switch so hole is visible
                     show_pcb_uart_header = show_accoutrements,
                     show_headphone_jack = show_accoutrements,
-                    show_circuitry_clearance = show_clearances,
-
-                    switch_position = switch_position
+                    show_circuitry_clearance = show_clearances
                 );
             }
         }
@@ -400,8 +376,7 @@ module scout(
                 screw_head_clearance = screw_head_clearance,
                 nut_lock_floor = nut_lock_floor,
 
-                switch_clutch_web_length_extension
-                    = switch_clutch_web_length_extension,
+
 
                 show_dfm = show_dfm,
 
@@ -426,9 +401,7 @@ module scout(
             _knob();
         }
 
-        if (show_switch_clutch) {
-            _switch_clutch();
-        }
+
     }
 
     rotation = FLIP_VERTICALLY ? [0, 180, 0] : [0, 0, 0];
@@ -446,7 +419,7 @@ SHOW_BATTERY_HOLDER = false;
 SHOW_PCB = true;
 SHOW_KEYS_MOUNT_RAIL = true;
 SHOW_KEYS = true;
-SHOW_SWITCH_CLUTCH = false;
+
 SHOW_ENCLOSURE_TOP = true;
 SHOW_ACCOUTREMENTS = true;
 SHOW_KNOB = true;

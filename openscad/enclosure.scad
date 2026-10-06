@@ -6,11 +6,11 @@ use <../../poly555/openscad/lib/switch.scad>;
 
 use <../../apc/openscad/floating_hole_cavity.scad>;
 
-include <enclosure_engraving.scad>;
-include <enclosure_screw_cavities.scad>;
-include <key_lip_endstop.scad>;
+include <lib/enclosure_engraving.scad>;
+include <lib/enclosure_screw_cavities.scad>;
+include <lib/key_lip_endstop.scad>;
 include <keys.scad>;
-include <pcb_fixtures.scad>;
+include <lib/pcb_fixtures.scad>;
 
 /*
  * NOTES ON ENCLOSURE_WALL:
@@ -482,7 +482,7 @@ module enclosure(
 
         translate([
             e,
-            get_switch_peripheral_y(length),
+            get_usb_port_y(length),
             bottom_height - height - e
         ]) {
             cube([width, length, height + e]);
@@ -600,14 +600,14 @@ module enclosure(
         }
     }
 
-    function get_switch_peripheral_y(length = 0) = (
-        pcb_position.y + PCB_SWITCH_POSITION.y
+    function get_usb_port_y(length = 0) = (
+        pcb_position.y + PCB_USB_PORT_POSITION.y
             - SWITCH_ORIGIN.y
             + SWITCH_BASE_LENGTH / 2
             - length / 2
     );
 
-    module _switch_exposure(
+    module _usb_port_exposure(
         just_assembly_valley = false,
         length_clearance = .2 // intentionally loose
     ) {
@@ -615,7 +615,7 @@ module enclosure(
             + tolerance * 4 + length_clearance * 2;
         height = SWITCH_CLUTCH_GRIP_HEIGHT + tolerance * 4;
 
-        y = get_switch_peripheral_y(length);
+        y = get_usb_port_y(length);
         z = (dimensions.z - height) / 2 + 2;
 
         if (just_assembly_valley) {
@@ -643,21 +643,7 @@ module enclosure(
         }
     }
 
-    module _switch_clutch_aligners(
-        bottom = false,
-        width = ENCLOSURE_INNER_WALL,
-        height = 2
-    ) {
-        x = pcb_position.x;
-        y = get_switch_peripheral_y(switch_clutch_length_with_travel);
-        z = bottom
-            ? ENCLOSURE_FLOOR_CEILING - e
-            : dimensions.z - ENCLOSURE_FLOOR_CEILING - height;
 
-        translate([x, y, z]) {
-            cube([width, switch_clutch_length_with_travel, height + e]);
-        }
-    }
 
     module _keys_mount_nut_lock_rail(
         nut_cavity_size = NUT_DIAMETER + tolerance * 2,
@@ -942,7 +928,7 @@ module enclosure(
     module _back_corner_reinforcements(clearance = 1) {
         width = pcb_position.x - ENCLOSURE_WALL - clearance;
         length = dimensions.y
-            - get_switch_peripheral_y(switch_clutch_length_with_travel)
+            - get_usb_port_y(switch_clutch_length_with_travel)
             - ENCLOSURE_WALL - switch_clutch_length_with_travel - clearance;
 
         y = dimensions.y - ENCLOSURE_WALL - length;
@@ -1008,7 +994,7 @@ module enclosure(
                         _speaker_fixture();
                         // _pencil_stand(false);
                         // _battery_holder_fixtures(top = false);
-                        _switch_clutch_aligners(bottom = true);
+
                         _pow_engraving_lip_reinforcement(cavity = false);
                     }
                 }
@@ -1024,7 +1010,7 @@ module enclosure(
                         color(cavity_color) {
                            // _uart_header_exposure(just_assembly_valley = true);
                             _headphone_jack_cavity(just_assembly_valley = true);
-                            _switch_exposure(just_assembly_valley = true);
+                            _usb_port_exposure(just_assembly_valley = true);
                             _pow_engraving_lip_reinforcement(cavity = true);
                         }
                     }
@@ -1045,7 +1031,7 @@ module enclosure(
                         //     enclosure_dimensions = dimensions
                         // );
                         _battery_holder_fixtures(top = true);
-                        _switch_clutch_aligners(bottom = false);
+
                         _back_corner_reinforcements();
                     }
                 }
@@ -1101,7 +1087,7 @@ module enclosure(
                 _headphone_jack_cavity();
                 // _pencil_stand(true);
                 _led_exposure(cavity = true);
-                _switch_exposure();
+                _usb_port_exposure();
 
                 enclosure_screw_cavities(
                     screw_head_clearance = screw_head_clearance,

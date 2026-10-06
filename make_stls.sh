@@ -8,13 +8,14 @@ set -o errtrace
 
 # Constants
 openscad="/Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD"
-timestamp=$(date +"%Y-%m-%d_%Hh%Mm%Ss")
+timestamp=$(git log -n1 --date=unix --format="%ad" openscad)
+commit_hash=$(git log -n1 --format="%h" openscad)
 
 # Flags
 bonk=
 # prefix="oskitone-apc"
 prefix="scout"
-dir="local/3d-models/$prefix-$timestamp"
+dir="local/3d-models/$prefix-$timestamp-$commit_hash"
 query=
 
 # Internal variables
@@ -56,8 +57,8 @@ function export_stl() {
     flip_vertically="$4"
 
     function _run() {
-        ascii_filename="$dir/$prefix-$timestamp-$stub-ascii.stl"
-        filename="$dir/$prefix-$timestamp-$stub.stl"
+        ascii_filename="$dir/$prefix-$timestamp-$commit_hash-$stub-ascii.stl"
+        filename="$dir/$prefix-$timestamp-$commit_hash-$stub.stl"
 
         echo "Exporting $filename..."
 
@@ -105,7 +106,7 @@ function create_zip() {
         echo
         echo "Creating zip"
         pushd $dir
-        zip "$prefix-$timestamp-ALL.zip" *.stl
+        zip "$prefix-$timestamp-$commit_hash-ALL.zip" *.stl
         popd > /dev/null
     fi
 }
@@ -123,14 +124,12 @@ function run() {
 
     # The "& \" at the end runs everything in parallel!
     export_stl 'enclosure_bottom' 'SHOW_ENCLOSURE_BOTTOM' 'true' 'false' & \
-    export_stl 'battery_holder' 'SHOW_BATTERY_HOLDER' 'true' 'false' & \
     export_stl 'keys_mount_rail' 'SHOW_KEYS_MOUNT_RAIL' 'true' 'false' & \
     export_stl 'keys' 'SHOW_KEYS' 'true' 'false' & \
-    export_stl 'switch_clutch' 'SHOW_SWITCH_CLUTCH' 'true' 'false' & \
-    export_stl 'switch_clutch-no_support' 'SHOW_SWITCH_CLUTCH' 'false' 'false' & \
     export_stl 'enclosure_top' 'SHOW_ENCLOSURE_TOP' 'true' 'true' & \
-    export_stl 'enclosure_top-no_support' 'SHOW_ENCLOSURE_TOP' 'false' 'true' & \
     export_stl 'knob' 'SHOW_KNOB' 'true' 'false' & \
+    openscad -o "$dir/scout-$timestamp-$hash-custom_button.stl" openscad/custom_button.scad & \
+    openscad -o "$dir/scout-$timestamp-$hash-button_adapter.stl" openscad/button_adapter.scad & \
     wait
 
     end=`date +%s`

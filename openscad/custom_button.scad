@@ -1,11 +1,11 @@
-// Custom Button ("Top Hat" design) for Mode and Octave
+// Custom Button ("Top Hat" design) for Mode and Octave - 4mm hole
 
 // Configurable parameters
 top_diameter = 7.6;     // Top diameter (slightly less than 8mm for tolerance)
 top_height = 5;         // Height of the part protruding from the enclosure
 base_diameter = 12;     // Base diameter to keep the button inside the enclosure
 base_height = 6;        // Base thickness
-hole_diameter = 3.5;    // Hole diameter for the tact switch
+hole_diameter = 4;      // Hole diameter for the tact switch (adjusted to 4mm)
 hole_depth = 2;         // Hole depth for the tact switch
 
 // Render quality (number of facets)
