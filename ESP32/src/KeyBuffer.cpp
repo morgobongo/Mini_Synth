@@ -3,8 +3,6 @@
 
 #define CIRCULAR_BUFFER_DEBUG
 #include <CircularBuffer.hpp>
-#include <Keypad.h>
-
 #include "HardwarePins.h"
 
 const byte ROWS = 4;
@@ -18,11 +16,12 @@ byte key_indexes[ROWS][COLS] = {
 byte rowPins[ROWS] = {PIN_MATRIX_ROW_1, PIN_MATRIX_ROW_2, PIN_MATRIX_ROW_3, PIN_MATRIX_ROW_4};
 byte colPins[COLS] = {PIN_MATRIX_COL_1, PIN_MATRIX_COL_2, PIN_MATRIX_COL_3, PIN_MATRIX_COL_4, PIN_MATRIX_COL_5};
 
-Keypad _buttons = Keypad(makeKeymap(key_indexes), rowPins, colPins, ROWS, COLS);
-
 KeyBuffer::KeyBuffer() {
-  const int KEYPAD_LIBRARY_MINIMUM_DEBOUNCE = 10;
-  _buttons.setDebounceTime(KEYPAD_LIBRARY_MINIMUM_DEBOUNCE);
+  for (int i = 0; i < 17; i++) {
+    _physicalKeyState[i] = false;
+    _lastPhysicalKeyState[i] = false;
+    _lastDebounceTime[i] = 0;
+  }
 }
 
 bool KeyBuffer::isEmpty() {
@@ -69,23 +68,66 @@ bool KeyBuffer::removeFromBuffer(int c) {
   return hasRemoval;
 }
 
-void KeyBuffer::populate() {
-  bool isActive = false;
+void KeyBuffer::scanMatrix() {
+  static bool initialized = false;
+  if (!initialized) {
+    for (int r = 0; r < ROWS; r++) {
+      pinMode(rowPins[r], INPUT_PULLUP);
+    }
+    for (int c = 0; c < COLS; c++) {
+      pinMode(colPins[c], INPUT);
+    }
+    initialized = true;
+  }
 
-  _buttons.getKeys(); // populate keys
+  static unsigned long lastScanTime = 0;
+  if (millis() - lastScanTime < 5) return;
+  lastScanTime = millis();
 
-  for (int i = 0; i < LIST_MAX; i++) {
-    byte kstate = _buttons.key[i].kstate;
-    byte kchar = _buttons.key[i].kchar - 1;
+  const int DEBOUNCE_DELAY = 10;
+  
+  for (int c = 0; c < COLS; c++) {
+    pinMode(colPins[c], OUTPUT);
+    digitalWrite(colPins[c], LOW);
+    
+    delayMicroseconds(10); 
 
-    if (kstate == PRESSED || kstate == HOLD) {
-      if (!isInBuffer(kchar)) {
-        _buffer.unshift(kchar);
+    for (int r = 0; r < ROWS; r++) {
+      int keyIndex = key_indexes[r][c] - 1;
+      if (keyIndex >= 0 && keyIndex < 17) {
+        bool isPressed = (digitalRead(rowPins[r]) == LOW);
+        
+        if (isPressed != _lastPhysicalKeyState[keyIndex]) {
+          _lastDebounceTime[keyIndex] = millis();
+        }
+        
+        if ((millis() - _lastDebounceTime[keyIndex]) > DEBOUNCE_DELAY) {
+          if (isPressed != _physicalKeyState[keyIndex]) {
+            _physicalKeyState[keyIndex] = isPressed;
+          }
+        }
+        _lastPhysicalKeyState[keyIndex] = isPressed;
       }
+    }
+    
+    pinMode(colPins[c], INPUT);
+  }
+}
 
+void KeyBuffer::populate() {
+  scanMatrix();
+  
+  bool isActive = false;
+  for (int i = 0; i < 17; i++) {
+    if (_physicalKeyState[i]) {
+      if (!isInBuffer(i)) {
+        _buffer.unshift(i);
+      }
       isActive = true;
-    } else if (isInBuffer(kchar)) {
-      removeFromBuffer(kchar);
+    } else {
+      if (isInBuffer(i)) {
+        removeFromBuffer(i);
+      }
     }
   }
 
@@ -126,4 +168,11 @@ char KeyBuffer::getAt(int index) {
     return _buffer[index];
   }
   return -1;
+}
+
+bool KeyBuffer::isPhysicallyPressed(int index) {
+  if (index >= 0 && index < 17) {
+    return _physicalKeyState[index];
+  }
+  return false;
 }

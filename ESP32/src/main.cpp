@@ -17,8 +17,8 @@
 
 // PUSH BUTTONS & BANK CONFIG
 // ---------------------------------------------------------
-#define BUTTON_PRESET_PIN 15
-#define BUTTON_OCTAVE_PIN 33
+#define BUTTON_PRESET_PIN 33
+#define BUTTON_OCTAVE_PIN 15
 
 
 int currentPresetIndex = 0;
@@ -65,10 +65,11 @@ KeyBuffer buffer;
 volatile int activeVoiceCount = 0;
 
 void blink(int count = 2, int wait = 200) {
+  const int LED_BRIGHTNESS = 178; // 7/10 (environ 70% de 255)
   while (count >= 0) {
-    digitalWrite(LED_BUILTIN, HIGH);
+    analogWrite(LED_BUILTIN, LED_BRIGHTNESS);
     delay(wait);
-    digitalWrite(LED_BUILTIN, LOW);
+    analogWrite(LED_BUILTIN, 0);
     delay(wait);
     count--;
   }
@@ -115,8 +116,12 @@ void updateControl() {
   static unsigned long bothHeldStart = 0;
   static bool bothWereHeld = false;
   static bool ignoreNextRelease = false;
-  static int playingMidiNote[16] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-  static unsigned long previewSampleEndTime = 0;
+  
+  static bool lastPresetState = false;
+  static bool lastOctaveState = false;
+
+  bool presetJustPressed = presetPressed && !lastPresetState;
+  bool octaveJustPressed = octavePressed && !lastOctaveState;
 
   if (presetPressed && octavePressed) {
     if (!bothWereHeld) {
@@ -131,7 +136,11 @@ void updateControl() {
         Serial.print("MIDI Mode: ");
         Serial.println(newMode ? "ON" : "OFF");
       }
-      digitalWrite(LED_BUILTIN, newMode ? HIGH : LOW);
+      if (newMode) {
+        analogWrite(LED_BUILTIN, 178); // 7/10
+      } else {
+        analogWrite(LED_BUILTIN, 0);
+      }
     }
   } else {
     bothWereHeld = false;
@@ -141,20 +150,19 @@ void updateControl() {
   }
 
   if (!bothWereHeld && !ignoreNextRelease) {
-    if (presetPressed && (now - lastPresetTouch > TOUCH_DEBOUNCE_MS)) {
+    if (presetJustPressed && (now - lastPresetTouch > TOUCH_DEBOUNCE_MS)) {
       lastPresetTouch = now;
       currentPresetIndex++;
       if (currentPresetIndex >= NUM_PRESETS) currentPresetIndex = 0;
       loadPreset(soundBank[currentPresetIndex]);
       octave = 3; // Reset octave to default when mode changes
-      previewSampleEndTime = now + 400; // Preview sample for 400ms
       if (printToSerial) {
         Serial.print("Preset: SOUND_");
         Serial.println(currentPresetIndex + 1);
       }
     }
     
-    if (octavePressed && (now - lastOctaveTouch > TOUCH_DEBOUNCE_MS)) {
+    if (octaveJustPressed && (now - lastOctaveTouch > TOUCH_DEBOUNCE_MS)) {
       lastOctaveTouch = now;
       if (octave == 3) octave = 2;
       else if (octave == 2) octave = 4;
@@ -169,29 +177,28 @@ void updateControl() {
   // ----------------------------------------------------
   // MIDI & BUFFER LOGIC
   // ----------------------------------------------------
-  bool isKeyActive[16] = {false};
+  bool isKeyActive[17] = {false};
   
-  for (int i = 0; i < buffer.getSize(); i++) {
-    char k = buffer.getAt(i);
-    if (k >= 0 && k < 16) isKeyActive[k] = true;
+  for (int k = 0; k < 17; k++) {
+    isKeyActive[k] = buffer.isPhysicallyPressed(k);
   }
 
   MidiManager::processKeys(isKeyActive, octave);
+  if (MidiManager::isModeActive()) {
+    MidiManager::setSustain(presetPressed && !octavePressed);
+  }
   
   bool isPreviewing = false;
-  if (!MidiManager::isModeActive() && (now < previewSampleEndTime)) {
+  if (!MidiManager::isModeActive() && (presetPressed || octavePressed) && !bothWereHeld && !ignoreNextRelease) {
     if (buffer.isEmpty()) {
       isPreviewing = true;
-    } else {
-      // Cancel preview if a real key is pressed
-      previewSampleEndTime = 0; 
     }
   }
 
   if (MidiManager::isModeActive()) {
     activeVoiceCount = 0; // Silence local synth in MIDI mode
   } else if (isPreviewing) {
-    activeVoiceCount = 1; // Force 1 voice for the preview
+    activeVoiceCount = (activePreset->numVoices > 1) ? 2 : 1; // 2 voices for poly preview, 1 for mono
   } else {
     activeVoiceCount = buffer.getSize();
   }
@@ -264,7 +271,7 @@ void updateControl() {
     
     // First, maintain currently held keys
     for (int i = 0; i < activeVoiceCount; i++) {
-      char key = isPreviewing ? 0 : buffer.getAt(i);
+      char key = isPreviewing ? (i == 0 ? 0 : 4) : buffer.getAt(i);
       
       for (int v = 0; v < NUM_VOICES; v++) {
         if (voices[v].isActive && voices[v].currentKey == key && !matched[v]) {
@@ -290,14 +297,14 @@ void updateControl() {
     char minKey = 127;
     char maxKey = -1;
     for (int i = 0; i < activeVoiceCount; i++) {
-      char k = isPreviewing ? 0 : buffer.getAt(i);
+      char k = isPreviewing ? (i == 0 ? 0 : 4) : buffer.getAt(i);
       if (k < minKey) minKey = k;
       if (k > maxKey) maxKey = k;
     }
     
     // Now allocate new keys
     for (int i = 0; i < activeVoiceCount; i++) {
-      char key = isPreviewing ? 0 : buffer.getAt(i);
+      char key = isPreviewing ? (i == 0 ? 0 : 4) : buffer.getAt(i);
       bool alreadyAssigned = false;
       
       for (int v = 0; v < NUM_VOICES; v++) {
@@ -370,6 +377,10 @@ void updateControl() {
   for (int v = 0; v < NUM_VOICES; v++) {
     voices[v].envelope.update(); 
   }
+
+  // Update last states
+  lastPresetState = presetPressed;
+  lastOctaveState = octavePressed;
 }
 
 int updateAudio() {
